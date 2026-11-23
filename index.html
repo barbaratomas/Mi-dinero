@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#1B4F9C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi dinero">
+<title>Mi dinero</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{
+  --azul:#1B4F9C; --azul-osc:#123A73; --azul-claro:#E8F0FB;
+  --verde:#1F8A4C; --verde-claro:#E4F5EA;
+  --rojo:#C0392B; --rojo-claro:#FBE9E7;
+  --amarillo:#FFF4C2; --texto:#1B2430; --gris:#5B6676; --borde:#D5DCE5; --fondo:#F4F6F9;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--fondo);color:var(--texto);font-family:"Segoe UI",Roboto,system-ui,Arial,sans-serif;font-size:20px;line-height:1.35}
+header{background:#fff;border-bottom:1px solid var(--borde);padding:12px 16px 10px;position:sticky;top:0;z-index:5}
+header .fila{display:flex;align-items:center;justify-content:space-between;gap:10px}
+header img{height:18px;width:auto;max-width:58%}
+.btn-voz{border:2px solid var(--azul);background:#fff;color:var(--azul);border-radius:999px;font-size:17px;font-weight:700;padding:7px 12px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.btn-voz.hablando{background:var(--azul);color:#fff}
+main{max-width:620px;margin:0 auto;padding:16px 14px 120px}
+h1{font-size:28px;margin:6px 0 4px}
+h2{font-size:23px;margin:22px 0 10px}
+.sub{color:var(--gris);margin:0 0 14px;font-size:19px}
+.tarjeta{background:#fff;border:1px solid var(--borde);border-radius:18px;padding:16px;margin-bottom:14px}
+.entra label{display:block;font-weight:700;margin-bottom:8px}
+.campo-euro{display:flex;align-items:center;gap:8px}
+input[type=number],input[type=text],select{font-size:24px;font-weight:700;padding:12px 14px;border:2px solid #C9B44A;background:var(--amarillo);border-radius:12px;width:100%;color:var(--texto);font-family:inherit}
+select{border-color:var(--borde);background:#fff;font-size:20px}
+input:focus,select:focus{outline:3px solid var(--azul);outline-offset:1px}
+.euro{font-size:26px;font-weight:700}
+.resumen{display:grid;gap:10px}
+.dato{display:flex;align-items:center;gap:14px;border-radius:16px;padding:14px 16px;background:#fff;border:1px solid var(--borde)}
+.dato .ico{font-size:40px;line-height:1}
+.dato .txt{flex:1;font-weight:600}
+.dato .num{font-size:26px;font-weight:800;white-space:nowrap}
+.dato.ahorro{background:var(--verde-claro);border-color:#A9DDBC}
+.dato.ahorro .num{color:var(--verde)}
+.mensaje{border-radius:16px;padding:16px;font-weight:700;font-size:21px;display:flex;gap:12px;align-items:center;margin-top:12px}
+.mensaje .ico{font-size:36px}
+.mensaje.bien{background:var(--verde-claro);color:#145C33}
+.mensaje.mal{background:var(--rojo-claro);color:#8E2A1F}
+.mensaje.info{background:var(--azul-claro);color:var(--azul-osc)}
+.progreso{height:16px;background:#E3E8EF;border-radius:999px;overflow:hidden;margin:8px 0 4px}
+.progreso div{height:100%;background:var(--verde);border-radius:999px;transition:width .3s}
+.pago{display:grid;grid-template-columns:64px 1fr;gap:4px 12px;align-items:center}
+.pago .emoji{font-size:44px;text-align:center;grid-row:span 2}
+.pago .nombre{font-size:23px;font-weight:800}
+.pago .cada{display:inline-block;font-size:17px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--azul-claro);color:var(--azul-osc)}
+.pago .zona{grid-column:1 / -1;margin-top:10px}
+.pago .zona label{font-weight:600;color:var(--gris);font-size:18px;display:block;margin-bottom:6px}
+.guardo{margin-top:10px;background:var(--verde-claro);border-radius:12px;padding:10px 12px;font-weight:700;color:#145C33;font-size:19px}
+.guardo b{font-size:23px}
+.btn-pagado{margin-top:12px;width:100%;font-size:22px;font-weight:800;padding:16px;border-radius:14px;border:3px solid var(--azul);background:#fff;color:var(--azul);cursor:pointer;font-family:inherit}
+.btn-pagado.si{background:var(--verde);border-color:var(--verde);color:#fff}
+.pago.hecho{border-color:#A9DDBC;background:#FAFFFB}
+.btn{display:block;width:100%;font-size:22px;font-weight:800;padding:16px;border-radius:14px;border:none;background:var(--azul);color:#fff;cursor:pointer;font-family:inherit;margin-top:10px}
+.btn.sec{background:#fff;color:var(--azul);border:3px solid var(--azul)}
+.btn.peligro{background:#fff;color:var(--rojo);border:3px solid var(--rojo)}
+.btn-mini{border:none;background:none;color:var(--gris);font-size:17px;text-decoration:underline;cursor:pointer;padding:6px 0;font-family:inherit}
+.hucha-total{text-align:center;padding:22px 16px}
+.hucha-total .cerdito{font-size:84px;line-height:1}
+.hucha-total .num{font-size:44px;font-weight:800;color:var(--verde);margin:6px 0}
+.mes-pasado{display:flex;justify-content:space-between;align-items:center;width:100%;padding:14px 4px;border:none;border-bottom:1px solid var(--borde);background:none;font-size:20px;font-family:inherit;color:var(--texto);cursor:pointer;text-align:left}
+.fila-det{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--borde);font-size:19px}
+.caja{max-height:88vh;overflow:auto}
+.mes-pasado:last-child{border-bottom:none}
+.mes-pasado b{color:var(--verde)}
+.paso{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px}
+.paso .n{font-size:34px;line-height:1}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--borde);display:flex;z-index:10;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;border:none;background:none;padding:10px 4px 12px;font-size:16px;font-weight:700;color:var(--gris);cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button .i{font-size:30px;line-height:1}
+nav button.activo{color:var(--azul);box-shadow:inset 0 4px 0 var(--azul)}
+.oculto{display:none!important}
+.velo{position:fixed;inset:0;background:rgba(18,30,48,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:20}
+.caja{background:#fff;border-radius:20px;padding:22px;max-width:480px;width:100%}
+.caja h3{font-size:24px;margin:0 0 10px}
+.aviso{background:var(--amarillo);border-radius:12px;padding:12px 14px;font-size:18px;margin-top:10px}
+.pie{text-align:center;color:var(--gris);font-size:15px;margin-top:26px}
+.pie img{height:16px;opacity:.8}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="fila">
+    <img src="logo.png" alt="ASINDOWN Formación">
+    <button class="btn-voz" id="btnVoz" type="button" aria-label="Leer en voz alta">🔊 Escuchar</button>
+  </div>
+</header>
+
+<main>
+  <div class="tarjeta oculto" id="bannerInstalar" style="background:var(--azul-claro);border-color:#B9CDEB">
+    <b>📲 Pon la app en tu móvil</b>
+    <p style="margin:6px 0 0;font-size:18px">Así la abres con el cerdito 🐷 y funciona sin internet.</p>
+    <button class="btn" type="button" onclick="instalar()">📲 Instalar la app</button>
+  </div>
+  <!-- ===== PANTALLA 1: MI MES ===== -->
+  <section id="p-mes">
+    <h1>💶 Mi dinero de <span id="nombreMes"></span></h1>
+    <p class="sub">Aquí veo cuánto dinero entra, cuánto pago y cuánto ahorro.</p>
+
+    <div class="tarjeta entra">
+      <label for="entra">💶 Dinero que ENTRA este mes</label>
+      <div class="campo-euro"><input id="entra" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"><span class="euro">€</span></div>
+      <p class="sub" style="margin:8px 0 0;font-size:17px">Por ejemplo: el sueldo o la pensión.</p>
+    </div>
+
+    <div class="resumen">
+      <div class="dato"><span class="ico">🧾</span><span class="txt">Dinero que PAGO</span><span class="num" id="rPago">0 €</span></div>
+      <div class="dato"><span class="ico">➖</span><span class="txt">Dinero que me SOBRA</span><span class="num" id="rSobra">—</span></div>
+      <div class="dato ahorro"><span class="ico">🐷</span><span class="txt">Dinero que AHORRO</span><span class="num" id="rAhorro">—</span></div>
+    </div>
+    <div class="mensaje info" id="mensaje"><span class="ico">✏️</span><span id="mensajeTxt"></span></div>
+
+    <div class="tarjeta" style="margin-top:14px">
+      <b>✅ Pagos hechos: <span id="hechos">0</span> de <span id="totalPagos">0</span></b>
+      <div class="progreso"><div id="barra" style="width:0%"></div></div>
+      <button class="btn" type="button" onclick="ir('pagos')">🧾 Ver mis pagos</button>
+    </div>
+  </section>
+
+  <!-- ===== PANTALLA 2: MIS PAGOS ===== -->
+  <section id="p-pagos" class="oculto">
+    <h1>🧾 Mis pagos</h1>
+    <p class="sub">Estas cosas las tengo que pagar SIEMPRE.<br>Escribo lo que cuesta cada una. La app me dice lo que guardo este mes.</p>
+    <div id="listaPagos"></div>
+    <button class="btn sec" type="button" onclick="abrirNuevo()">➕ Añadir otro pago</button>
+  </section>
+
+  <!-- ===== PANTALLA 3: MI HUCHA ===== -->
+  <section id="p-hucha" class="oculto">
+    <h1>🐷 Mi hucha</h1>
+    <div class="tarjeta hucha-total">
+      <div class="cerdito">🐷</div>
+      <div>Llevo ahorrado</div>
+      <div class="num" id="huchaTotal">0 €</div>
+      <div class="sub" style="margin:0">Sumando todos los meses terminados.</div>
+    </div>
+
+    <div class="tarjeta">
+      <h2 style="margin-top:0">📅 ¿Se acaba el mes?</h2>
+      <p style="margin-top:0">Cuando termina el mes, pulso el botón.<br>El ahorro del mes se guarda en la hucha. Y empiezo un mes nuevo.</p>
+      <button class="btn" type="button" onclick="abrirTerminar()">✅ Terminar el mes</button>
+    </div>
+
+    <div class="tarjeta">
+      <h2 style="margin-top:0">📒 Meses terminados</h2>
+      <p class="sub" style="margin-top:-4px;font-size:17px">Pulso un mes para ver lo que pagué.</p>
+      <div id="historial"></div>
+    </div>
+  </section>
+
+  <!-- ===== PANTALLA 4: AYUDA ===== -->
+  <section id="p-ayuda" class="oculto">
+    <h1>❓ Cómo se usa</h1>
+    <div class="tarjeta">
+      <div class="paso"><span class="n">1️⃣</span><div>Escribo el dinero que <b>ENTRA</b> este mes.</div></div>
+      <div class="paso"><span class="n">2️⃣</span><div>En <b>Mis pagos</b> escribo lo que cuesta cada cosa. Lo miro en la factura.</div></div>
+      <div class="paso"><span class="n">3️⃣</span><div>Cuando pago una cosa, pulso <b>✅ Ya está pagado</b>.</div></div>
+      <div class="paso"><span class="n">4️⃣</span><div>El <b>AHORRO</b> lo guardo el primer día del mes. No espero al final.</div></div>
+      <div class="paso"><span class="n">5️⃣</span><div>Al final del mes, voy a <b>Mi hucha</b> y pulso <b>Terminar el mes</b>.</div></div>
+    </div>
+    <div class="tarjeta">
+      <h2 style="margin-top:0">💧 Pagos que NO son cada mes</h2>
+      <p style="margin-top:0">El agua, el IBI y el seguro del coche no se pagan cada mes.</p>
+      <p>Pero cada mes guardo un poco. Así, cuando llega la factura, ya tengo el dinero.</p>
+      <div class="guardo">Ejemplo: el agua cuesta 60 € cada 3 meses.<br>Cada mes guardo <b>20 €</b>.</div>
+    </div>
+    <div class="tarjeta">
+      <h2 style="margin-top:0">🔊 Escuchar</h2>
+      <p style="margin:0">Si pulso <b>🔊 Escuchar</b> (arriba), el móvil me lee la pantalla.</p>
+    </div>
+    <div class="tarjeta">
+      <h2 style="margin-top:0">📲 Poner la app en el móvil</h2>
+      <p style="margin-top:0"><b>Móvil Android</b> (con Chrome):<br>pulso <b>📲 Instalar la app</b>. Si no sale, pulso los 3 puntos <b>⋮</b> de arriba → <b>Instalar aplicación</b> o <b>Añadir a pantalla de inicio</b>.</p>
+      <p style="margin-bottom:0"><b>iPhone</b> (con Safari):<br>pulso el botón <b>Compartir ⬆️</b> → <b>Añadir a pantalla de inicio</b>.</p>
+    </div>
+    <div class="aviso" id="avisoGuardado">💾 Lo que escribo se guarda en este móvil.</div>
+    <button class="btn-mini" type="button" onclick="abrirBorrar()" style="margin-top:16px">Borrar todo y empezar de cero</button>
+  </section>
+
+  <p class="pie"><img src="logo.png" alt="ASINDOWN Formación"></p>
+</main>
+
+<nav>
+  <button type="button" data-p="mes" class="activo" onclick="ir('mes')"><span class="i">🏠</span>Mi mes</button>
+  <button type="button" data-p="pagos" onclick="ir('pagos')"><span class="i">🧾</span>Pagos</button>
+  <button type="button" data-p="hucha" onclick="ir('hucha')"><span class="i">🐷</span>Hucha</button>
+  <button type="button" data-p="ayuda" onclick="ir('ayuda')"><span class="i">❓</span>Ayuda</button>
+</nav>
+
+<!-- Ventana: terminar mes -->
+<div class="velo oculto" id="vTerminar">
+  <div class="caja">
+    <h3>✅ Terminar el mes</h3>
+    <p id="terminarTxt"></p>
+    <button class="btn" type="button" onclick="terminarMes()">Sí, terminar el mes</button>
+    <button class="btn sec" type="button" onclick="cerrar('vTerminar')">No, volver</button>
+  </div>
+</div>
+
+<!-- Ventana: nuevo pago -->
+<div class="velo oculto" id="vNuevo">
+  <div class="caja">
+    <h3>➕ Añadir otro pago</h3>
+    <label for="nNombre" style="font-weight:700">¿Qué pago?</label>
+    <input id="nNombre" type="text" placeholder="Por ejemplo: gimnasio" style="margin:6px 0 12px">
+    <label for="nCada" style="font-weight:700">¿Cada cuánto?</label>
+    <select id="nCada" style="margin-top:6px"></select>
+    <button class="btn" type="button" onclick="guardarNuevo()">Guardar</button>
+    <button class="btn sec" type="button" onclick="cerrar('vNuevo')">Cancelar</button>
+  </div>
+</div>
+
+<!-- Ventana: ver un mes pasado -->
+<div class="velo oculto" id="vMes">
+  <div class="caja">
+    <h3 id="vMesTit"></h3>
+    <div id="vMesCuerpo"></div>
+    <button class="btn" type="button" onclick="cerrar('vMes')">Cerrar</button>
+  </div>
+</div>
+
+<!-- Ventana: borrar todo -->
+<div class="velo oculto" id="vBorrar">
+  <div class="caja">
+    <h3>⚠️ ¿Borrar todo?</h3>
+    <p>Se borran los precios, los pagos y la hucha. No se puede deshacer.</p>
+    <button class="btn peligro" type="button" onclick="borrarTodo()">Sí, borrar todo</button>
+    <button class="btn sec" type="button" onclick="cerrar('vBorrar')">No, volver</button>
+  </div>
+</div>
+
+<script>
+const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const FRECUENCIAS={
+  "semana":{txt:"Cada semana",factor:4},
+  "mes":{txt:"Cada mes",factor:1},
+  "3meses":{txt:"Cada 3 meses",factor:1/3},
+  "6meses":{txt:"Cada 6 meses",factor:1/6},
+  "año":{txt:"Cada año",factor:1/12}
+};
+const PAGOS_INICIALES=[
+  {e:"💡",n:"Luz",f:"mes"},
+  {e:"💧",n:"Agua",f:"3meses"},
+  {e:"🏠",n:"Hipoteca",f:"mes"},
+  {e:"🛒",n:"Compra",f:"semana",nota:"Escribo lo que gasto en 1 semana."},
+  {e:"🏛️",n:"IBI (impuesto de la casa)",f:"año"},
+  {e:"🚗",n:"Seguro del coche",f:"6meses"},
+  {e:"🥁",n:"Tymbals",f:"mes"},
+  {e:"🎆",n:"Falla (1)",f:"mes"},
+  {e:"🎆",n:"Falla (2)",f:"mes"},
+  {e:"🛡️",n:"Seguro del piso",f:"mes"},
+  {e:"📱",n:"Teléfono (1)",f:"mes"},
+  {e:"📱",n:"Teléfono (2)",f:"mes"},
+  {e:"⛽",n:"Gasolina",f:"mes"},
+  {e:"🐷",n:"Ahorro",f:"mes",ahorro:true,nota:"Lo guardo el primer día del mes."}
+];
+const CLAVE="midinero_asindown_v1";
+let guardaOK=true;
+
+function estadoNuevo(){
+  const h=new Date();
+  return {mes:h.getMonth(),anio:h.getFullYear(),entra:null,
+    pagos:PAGOS_INICIALES.map((p,i)=>({id:"p"+i,e:p.e,n:p.n,f:p.f,ahorro:!!p.ahorro,nota:p.nota||"",cuesta:null,pagado:false})),
+    historial:[]};
+}
+function cargar(){
+  try{const t=localStorage.getItem(CLAVE); if(t) return JSON.parse(t);}catch(e){guardaOK=false;}
+  return estadoNuevo();
+}
+let E=cargar();
+function guardar(){
+  try{localStorage.setItem(CLAVE,JSON.stringify(E));guardaOK=true;}catch(e){guardaOK=false;}
+  const a=document.getElementById("avisoGuardado");
+  if(a) a.textContent=guardaOK?"💾 Lo que escribo se guarda en este móvil.":"⚠️ Este móvil no deja guardar los datos. Al cerrar la app se pueden perder.";
+}
+
+const fmt=n=>(Math.round(n*100)/100).toLocaleString("es-ES",{minimumFractionDigits:0,maximumFractionDigits:2})+" €";
+const num=v=>(v===null||v===""||isNaN(v))?null:Number(v);
+const guardoMes=p=>{const c=num(p.cuesta);return c===null?0:Math.round(c*FRECUENCIAS[p.f].factor*100)/100;};
+function totales(){
+  const pago=E.pagos.reduce((s,p)=>s+guardoMes(p),0);
+  const entra=num(E.entra);
+  const sobra=entra===null?null:entra-pago;
+  const ahorroFijo=E.pagos.filter(p=>p.ahorro).reduce((s,p)=>s+guardoMes(p),0);
+  const ahorro=entra===null?null:ahorroFijo+Math.max(sobra,0);
+  return {pago,entra,sobra,ahorro};
+}
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+function pintarMes(){
+  document.getElementById("nombreMes").textContent=MESES[E.mes];
+  const inp=document.getElementById("entra");
+  if(document.activeElement!==inp) inp.value=E.entra===null?"":E.entra;
+  const t=totales();
+  document.getElementById("rPago").textContent=fmt(t.pago);
+  document.getElementById("rSobra").textContent=t.sobra===null?"—":fmt(t.sobra);
+  document.getElementById("rAhorro").textContent=t.ahorro===null?"—":fmt(t.ahorro);
+  const m=document.getElementById("mensaje"),mt=document.getElementById("mensajeTxt"),mi=m.querySelector(".ico");
+  if(t.entra===null){m.className="mensaje info";mi.textContent="✏️";mt.textContent="Escribo arriba el dinero que entra este mes.";}
+  else if(t.sobra>=0){m.className="mensaje bien";mi.textContent="✅";mt.textContent="¡Muy bien! El dinero que sobra va a la hucha.";}
+  else{m.className="mensaje mal";mi.textContent="⚠️";mt.textContent="¡Cuidado! Este mes pago más dinero del que entra.";}
+  const hechos=E.pagos.filter(p=>p.pagado).length;
+  document.getElementById("hechos").textContent=hechos;
+  document.getElementById("totalPagos").textContent=E.pagos.length;
+  document.getElementById("barra").style.width=(E.pagos.length?hechos/E.pagos.length*100:0)+"%";
+}
+
+function opcionesFrecuencia(sel){
+  return Object.entries(FRECUENCIAS).map(([k,v])=>`<option value="${k}"${k===sel?" selected":""}>${v.txt}</option>`).join("");
+}
+function pintarPagos(){
+  const L=document.getElementById("listaPagos");
+  L.innerHTML=E.pagos.map(p=>{
+    const g=guardoMes(p);
+    const verbo=p.ahorro?"guardado":"pagado";
+    let guardoTxt="";
+    if(num(p.cuesta)!==null){
+      if(p.f==="mes") guardoTxt=`Este mes ${p.ahorro?"guardo":"pago"}: <b>${fmt(g)}</b>`;
+      else if(p.f==="semana") guardoTxt=`Al mes (4 semanas): <b>${fmt(g)}</b>`;
+      else guardoTxt=`Este mes guardo para esto: <b>${fmt(g)}</b>`;
+    }
+    return `<div class="tarjeta pago${p.pagado?" hecho":""}" id="t-${p.id}">
+      <span class="emoji" aria-hidden="true">${p.e}</span>
+      <span class="nombre">${esc(p.n)}</span>
+      <span><span class="cada">${FRECUENCIAS[p.f].txt}</span></span>
+      <div class="zona">
+        <label for="c-${p.id}">${p.ahorro?"¿Cuánto quiero ahorrar?":"¿Cuánto cuesta?"}${p.nota?" "+esc(p.nota):""}</label>
+        <div class="campo-euro"><input id="c-${p.id}" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0" value="${p.cuesta===null?"":p.cuesta}" oninput="cambiaCuesta('${p.id}',this.value)"><span class="euro">€</span></div>
+        <div class="guardo${guardoTxt?"":" oculto"}" id="g-${p.id}">${guardoTxt}</div>
+        <button type="button" class="btn-pagado${p.pagado?" si":""}" onclick="marcar('${p.id}')">${p.pagado?"✅ Ya está "+verbo:"⬜ Pulsar cuando esté "+verbo}</button>
+        <details style="margin-top:8px"><summary class="btn-mini" style="display:inline">Cambiar</summary>
+          <div style="margin-top:8px"><label for="f-${p.id}" style="font-weight:600;font-size:18px">¿Cada cuánto?</label>
+          <select id="f-${p.id}" onchange="cambiaFrec('${p.id}',this.value)" style="margin-top:6px">${opcionesFrecuencia(p.f)}</select>
+          ${p.ahorro?"":`<button type="button" class="btn peligro" style="font-size:18px;padding:10px" onclick="quitar('${p.id}')">🗑️ Quitar este pago</button>`}</div>
+        </details>
+      </div></div>`;
+  }).join("");
+}
+function pintarHucha(){
+  const total=E.historial.reduce((s,h)=>s+h.ahorro,0);
+  document.getElementById("huchaTotal").textContent=fmt(total);
+  const H=document.getElementById("historial");
+  H.innerHTML=E.historial.length?E.historial.map((h,i)=>({h,i})).reverse().map(({h,i})=>`<button type="button" class="mes-pasado" onclick="verMes(${i})"><span>📅 ${MESES[h.mes]} ${h.anio}</span><span><b>${fmt(h.ahorro)}</b> ›</span></button>`).join(""):`<p class="sub" style="margin:0">Todavía no hay meses terminados.</p>`;
+}
+function pintar(){pintarMes();pintarHucha();}
+
+function buscar(id){return E.pagos.find(p=>p.id===id);}
+function cambiaCuesta(id,v){
+  const p=buscar(id); p.cuesta=num(v); guardar();
+  const g=document.getElementById("g-"+id), x=guardoMes(p);
+  if(p.cuesta===null){g.classList.add("oculto");}
+  else{g.classList.remove("oculto");
+    g.innerHTML=p.f==="mes"?`Este mes ${p.ahorro?"guardo":"pago"}: <b>${fmt(x)}</b>`:p.f==="semana"?`Al mes (4 semanas): <b>${fmt(x)}</b>`:`Este mes guardo para esto: <b>${fmt(x)}</b>`;}
+  pintarMes();
+}
+function cambiaFrec(id,v){buscar(id).f=v;guardar();pintarPagos();pintarMes();}
+function marcar(id){const p=buscar(id);p.pagado=!p.pagado;guardar();pintarPagos();pintarMes();}
+function quitar(id){E.pagos=E.pagos.filter(p=>p.id!==id);guardar();pintarPagos();pintarMes();}
+
+document.getElementById("entra").addEventListener("input",e=>{E.entra=num(e.target.value);guardar();pintarMes();});
+
+function ir(p){
+  ["mes","pagos","hucha","ayuda"].forEach(x=>document.getElementById("p-"+x).classList.toggle("oculto",x!==p));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("activo",b.dataset.p===p));
+  if(p==="pagos") pintarPagos();
+  pintar(); pararVoz(); window.scrollTo(0,0);
+}
+function cerrar(id){document.getElementById(id).classList.add("oculto");}
+function abrirTerminar(){
+  const t=totales();
+  document.getElementById("terminarTxt").innerHTML=t.ahorro===null
+    ?"Todavía no he escrito el dinero que entra. Este mes se guarda con 0 € de ahorro."
+    :`Este mes ahorro <b>${fmt(t.ahorro)}</b>.<br>Se guarda en la hucha. Los precios se quedan. Las casillas de pagado se vacían.`;
+  document.getElementById("vTerminar").classList.remove("oculto");
+}
+function terminarMes(){
+  const t=totales();
+  E.historial.push({mes:E.mes,anio:E.anio,ahorro:t.ahorro===null?0:Math.round(t.ahorro*100)/100,
+    entra:t.entra,pago:Math.round(t.pago*100)/100,sobra:t.sobra,
+    pagos:E.pagos.map(p=>({e:p.e,n:p.n,f:p.f,cuesta:p.cuesta,guardo:guardoMes(p),pagado:p.pagado}))});
+  E.mes++; if(E.mes>11){E.mes=0;E.anio++;}
+  E.entra=null; E.pagos.forEach(p=>p.pagado=false);
+  guardar(); cerrar("vTerminar"); pintar();
+}
+function abrirNuevo(){
+  document.getElementById("nNombre").value="";
+  document.getElementById("nCada").innerHTML=opcionesFrecuencia("mes");
+  document.getElementById("vNuevo").classList.remove("oculto");
+}
+function guardarNuevo(){
+  const n=document.getElementById("nNombre").value.trim();
+  if(!n){document.getElementById("nNombre").focus();return;}
+  const f=document.getElementById("nCada").value;
+  const ahorroIdx=E.pagos.findIndex(p=>p.ahorro);
+  const nuevo={id:"n"+Date.now(),e:"📌",n,f,ahorro:false,nota:"",cuesta:null,pagado:false};
+  if(ahorroIdx>=0) E.pagos.splice(ahorroIdx,0,nuevo); else E.pagos.push(nuevo);
+  guardar(); cerrar("vNuevo"); pintarPagos(); pintarMes();
+}
+function verMes(i){
+  const h=E.historial[i];
+  document.getElementById("vMesTit").textContent="📅 "+MESES[h.mes].charAt(0).toUpperCase()+MESES[h.mes].slice(1)+" "+h.anio;
+  let s="";
+  if(h.pagos){
+    s+=`<div class="resumen" style="margin-bottom:12px">
+      <div class="dato"><span class="ico">💶</span><span class="txt">Entró</span><span class="num">${h.entra===null?"—":fmt(h.entra)}</span></div>
+      <div class="dato"><span class="ico">🧾</span><span class="txt">Pagué</span><span class="num">${fmt(h.pago)}</span></div>
+      <div class="dato ahorro"><span class="ico">🐷</span><span class="txt">Ahorré</span><span class="num">${fmt(h.ahorro)}</span></div></div>`;
+    s+=h.pagos.map(p=>`<div class="fila-det"><span>${p.pagado?"✅":"⬜"} ${p.e} ${esc(p.n)}</span><b>${p.cuesta===null?"—":fmt(p.guardo)}</b></div>`).join("");
+  } else s=`<p>Este mes ahorré <b>${fmt(h.ahorro)}</b>.</p>`;
+  document.getElementById("vMesCuerpo").innerHTML=s;
+  document.getElementById("vMes").classList.remove("oculto");
+}
+function abrirBorrar(){document.getElementById("vBorrar").classList.remove("oculto");}
+function borrarTodo(){E=estadoNuevo();guardar();cerrar("vBorrar");ir("mes");}
+
+/* ===== Voz ===== */
+const btnVoz=document.getElementById("btnVoz");
+const hayVoz="speechSynthesis" in window;
+if(!hayVoz) btnVoz.classList.add("oculto");
+function pararVoz(){if(hayVoz){speechSynthesis.cancel();btnVoz.classList.remove("hablando");btnVoz.textContent="🔊 Escuchar";}}
+function textoPantalla(){
+  const vis=document.querySelector("main section:not(.oculto)").id;
+  const t=totales();
+  if(vis==="p-mes"){
+    let s=`Mi dinero de ${MESES[E.mes]}. `;
+    s+=t.entra===null?"Todavía no he escrito el dinero que entra. ":`Entran ${fmt(t.entra)}. `;
+    s+=`Pago ${fmt(t.pago)}. `;
+    if(t.sobra!==null) s+=t.sobra>=0?`Me sobran ${fmt(t.sobra)}. Ahorro ${fmt(t.ahorro)}. ¡Muy bien!`:`¡Cuidado! Me faltan ${fmt(-t.sobra)}.`;
+    const hechos=E.pagos.filter(p=>p.pagado).length;
+    return s+` He hecho ${hechos} pagos de ${E.pagos.length}.`;
+  }
+  if(vis==="p-pagos"){
+    const falta=E.pagos.filter(p=>!p.pagado);
+    if(!falta.length) return "¡Muy bien! Todos los pagos están hechos.";
+    return "Me falta pagar: "+falta.map(p=>{const g=guardoMes(p);return p.n.replace(/\(.*?\)/g,"")+(g?", "+fmt(g):"");}).join(". ")+".";
+  }
+  if(vis==="p-hucha"){
+    const total=E.historial.reduce((s,h)=>s+h.ahorro,0);
+    return `Mi hucha. Llevo ahorrado ${fmt(total)}.`;
+  }
+  return document.getElementById("p-ayuda").innerText.split("Borrar todo")[0];
+}
+btnVoz.addEventListener("click",()=>{
+  if(!hayVoz) return;
+  if(speechSynthesis.speaking){pararVoz();return;}
+  const u=new SpeechSynthesisUtterance(textoPantalla().replace(/€/g," euros"));
+  u.lang="es-ES"; u.rate=0.9;
+  const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.toLowerCase().startsWith("es"));
+  if(v) u.voice=v;
+  u.onend=pararVoz; u.onerror=pararVoz;
+  btnVoz.classList.add("hablando"); btnVoz.textContent="⏹️ Parar";
+  speechSynthesis.speak(u);
+});
+
+/* ===== Instalar y funcionar sin internet ===== */
+let avisoInstalar=null;
+const yaInstalada=window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();avisoInstalar=e;if(!yaInstalada)document.getElementById("bannerInstalar").classList.remove("oculto");});
+window.addEventListener("appinstalled",()=>document.getElementById("bannerInstalar").classList.add("oculto"));
+async function instalar(){
+  if(!avisoInstalar){ir("ayuda");return;}
+  avisoInstalar.prompt();
+  try{await avisoInstalar.userChoice;}catch(e){}
+  avisoInstalar=null;document.getElementById("bannerInstalar").classList.add("oculto");
+}
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});});}
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+
+guardar(); pintar();
+</script>
+</body>
+</html>
